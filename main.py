@@ -567,7 +567,8 @@ class PassportDialog(QtWidgets.QDialog):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء الحفظ:\n{str(e)}")
 
-    def copy_file(self, src, dest_folder):
+    @staticmethod
+    def copy_file(src, dest_folder):
         if not src or not os.path.exists(src):
             return "" 
        
@@ -728,7 +729,8 @@ class VisaDialog(QtWidgets.QDialog):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "خطأ", f"حدث خطأ أثناء الحفظ:\n{str(e)}")
 
-    def copy_file(self, src, dest_folder):
+    @staticmethod
+    def copy_file(src, dest_folder):
         if not src or not os.path.exists(src):
             return ""  
         
@@ -917,7 +919,8 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
             else:
                 QMessageBox.warning(self, "خطأ", str(new_id))
 
-    def copy_file(self, src, dest_folder):
+    @staticmethod
+    def copy_file(src, dest_folder):
         if not src or not os.path.exists(src):
             return "" 
         
@@ -1322,7 +1325,8 @@ class CustodyViewer:
         self.populate_table(self.table_employee_custody, df_employee, "received_at")
         self.populate_table(self.table_company_custody, df_company)
 
-    def populate_table(self, table, df, date_field=None):
+    @staticmethod
+    def populate_table(table, df, date_field=None):
         table.setRowCount(len(df))
         for i, row in df.iterrows():
             table.setItem(i, 0, QtWidgets.QTableWidgetItem(str(row['id'])))
@@ -1587,12 +1591,14 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         dialog.exec_()
         self.refresh_emloyees()
 
-    def set_item_bg(self, item, color_hex):
+    @staticmethod
+    def set_item_bg(item, color_hex):
         color = QtGui.QBrush(QtGui.QColor(color_hex))
         for col in range(item.columnCount()):
             item.setBackground(col, color)
 
-    def add_action_buttons(self, tree_widget, item, update_callback, delete_callback):
+    @staticmethod
+    def add_action_buttons(tree_widget, item, update_callback, delete_callback):
         # إنشاء حاوية أفقية
         widget = QtWidgets.QWidget()
         layout = QtWidgets.QHBoxLayout(widget)
@@ -2249,7 +2255,8 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         df = self.db_conn._execute_query(query, fetch=True)
         self.show_visas(self._filter_by_days(df, days, "expiry_date"))
 
-    def _filter_by_days(self, df, days, date_col):
+    @staticmethod
+    def _filter_by_days(df, days, date_col):
         today = datetime.today().date()
         filtered = []
         

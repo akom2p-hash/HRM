@@ -1,0 +1,24 @@
+<RCC>
+  <qresource prefix="img">
+    <file>icon-open.png</file>
+    <file>icon-exit.png</file>
+    <file>icon-undelete.png</file>
+    <file>icon-add.png</file>
+    <file>icon-add-file.png</file>
+    <file>icon-analyze.png</file>
+    <file>icon-compose.png</file>
+    <file>icon-delete.png</file>
+    <file>icon-documents.png</file>
+    <file>icon-edit-image.png</file>
+    <file>icon-export-excel.png</file>
+    <file>icon-filter.png</file>
+    <file>icon-folder-arrows.png</file>
+    <file>icon-logout (2).png</file>
+    <file>icon-logout.png</file>
+    <file>icon-ok.png</file>
+    <file>icon-refresh.png</file>
+    <file>icon-save.png</file>
+    <file>icon-setting.png</file>
+    <file>logo.png</file>
+  </qresource>
+</RCC>

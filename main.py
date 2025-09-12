@@ -1350,7 +1350,8 @@ class EmployeeDataHandler:
                 f"INSERT INTO {table} (name) VALUES (?)", (name,), return_id=True
             ))
             return new_id
-        except:
+        except Exception as e:
+            logging.error("Failed to insert into %s: %s", table, e)
             return None
 
     def export_selected_data(self, selected_ids):
@@ -1626,7 +1627,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             self.db_conn.execute_query("DELETE FROM employees WHERE id=?", [emp_id])
             docs_folder = "documents/" + str(item.text(1))
             if os.path.exists(docs_folder):
-                def remove_readonly(func, path, excinfo):
+                def remove_readonly(func, path, _excinfo):
                     # Make file/folder writable and retry
                     os.chmod(path, 0o700)
                     func(path)
@@ -2369,6 +2370,7 @@ if __name__ == '__main__':
 # pyuic5 ui/EditEmployeePage.ui -o EditEmployeePage.py
 # pyrcc5 ui/img/img.qrc -o img_rc.py
 # pyinstaller --windowed --icon=ui\img\logo.ico --add-data="ui\img\logo.png;." --name "HRM" main.py
+
 
 
 

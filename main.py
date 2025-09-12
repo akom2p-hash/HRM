@@ -1628,7 +1628,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             if os.path.exists(docs_folder):
                 def remove_readonly(func, path, excinfo):
                     # Make file/folder writable and retry
-                    os.chmod(path, 0o777)
+                    os.chmod(path, 0o700)
                     func(path)
                 try:
                     shutil.rmtree(docs_folder, onerror=remove_readonly)
@@ -2369,6 +2369,7 @@ if __name__ == '__main__':
 # pyuic5 ui/EditEmployeePage.ui -o EditEmployeePage.py
 # pyrcc5 ui/img/img.qrc -o img_rc.py
 # pyinstaller --windowed --icon=ui\img\logo.ico --add-data="ui\img\logo.png;." --name "HRM" main.py
+
 
 
 

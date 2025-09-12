@@ -827,4 +827,3 @@ class Ui_MainWindow(object):
         self.NavBtn3.setText(_translate("MainWindow", "التنبيهات"))
         self.NavBtn4.setText(_translate("MainWindow", "الوثائق"))
         self.LogoutButton.setText(_translate("MainWindow", "تسجيل الخروج"))
-import img_rc

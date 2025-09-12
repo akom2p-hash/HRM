@@ -397,4 +397,3 @@ class Ui_EditEmployeeDialog(object):
         self.btnOpen.setText(_translate("EditEmployeeDialog", "   فتح الملف"))
         self.btnDeleteFile.setText(_translate("EditEmployeeDialog", "حذف الملف"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("EditEmployeeDialog", "وثائق الموظف"))
-import img_rc

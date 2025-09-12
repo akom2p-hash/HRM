@@ -11,7 +11,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_EditEmployeeDialog(object):
+class Ui_EditEmployeeDialog:
     def setupUi(self, EditEmployeeDialog):
         EditEmployeeDialog.setObjectName("EditEmployeeDialog")
         EditEmployeeDialog.resize(1135, 782)

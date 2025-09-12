@@ -1350,7 +1350,7 @@ class EmployeeDataHandler:
                 f"INSERT INTO {table} (name) VALUES (?)", (name,), return_id=True
             ))
             return new_id
-        except Exception as e:
+        except:
             return None
 
     def export_selected_data(self, selected_ids):
@@ -2369,6 +2369,7 @@ if __name__ == '__main__':
 # pyuic5 ui/EditEmployeePage.ui -o EditEmployeePage.py
 # pyrcc5 ui/img/img.qrc -o img_rc.py
 # pyinstaller --windowed --icon=ui\img\logo.ico --add-data="ui\img\logo.png;." --name "HRM" main.py
+
 
 
 

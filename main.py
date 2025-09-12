@@ -1,6 +1,3 @@
-
-
-
 import os, sys, shutil, sqlite3
 import pandas as pd
 from datetime import datetime
@@ -1130,9 +1127,9 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
                 btn_open.setIcon(icon)
                 btn_open.setIconSize(QtCore.QSize(32, 32))
                 btn_open.clicked.connect(lambda _, path=doc_path: self.open_doc(path))
-                self.table_visa.setCellWidget(i, j+1, btn_open)
+                self.table_visa.setCellWidget(i, len(df.columns), btn_open)
             else:
-                self.table_visa.setItem(i, j+1, QtWidgets.QTableWidgetItem("لا يوجد"))
+                self.table_visa.setItem(i, len(df.columns), QtWidgets.QTableWidgetItem("لا يوجد"))
 
     def add_visa(self):
         row = self.table_passport.currentRow()
@@ -2372,6 +2369,7 @@ if __name__ == '__main__':
 # pyuic5 ui/EditEmployeePage.ui -o EditEmployeePage.py
 # pyrcc5 ui/img/img.qrc -o img_rc.py
 # pyinstaller --windowed --icon=ui\img\logo.ico --add-data="ui\img\logo.png;." --name "HRM" main.py
+
 
 
 

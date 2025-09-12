@@ -1208,7 +1208,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
         """إضافة مستند عبر نسخ ملف للمجلد"""
         filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self, "اختر ملف")
         if filePath:
-            photo_path = self.copy_file(filePath, self.docs_folder)
+            self.copy_file(filePath, self.docs_folder)
             self.load_documents()
 
     def delete_document(self):
@@ -2337,7 +2337,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         
         HijriDate = Gregorian(today.year, today.month, today.day).to_hijri()
         
-        MyDate = "{arabic_days[HijriDate.weekday()]} {HijriDate.day} {arabic_hijri_months[HijriDate.month - 1]} {HijriDate.year} هـ / {arabic_gregorian_months[today.month - 1]} {today.year} {today.day} م"
+        MyDate = f"{arabic_days[HijriDate.weekday()]} {HijriDate.day} {arabic_hijri_months[HijriDate.month - 1]} {HijriDate.year} هـ / {arabic_gregorian_months[today.month - 1]} {today.year} {today.day} م"
         MyDate = MyDate + '  \t  \t  ' + MyTime 
         self.DateLabel.setText(MyDate)        
 
@@ -2369,6 +2369,7 @@ if __name__ == '__main__':
 # pyuic5 ui/EditEmployeePage.ui -o EditEmployeePage.py
 # pyrcc5 ui/img/img.qrc -o img_rc.py
 # pyinstaller --windowed --icon=ui\img\logo.ico --add-data="ui\img\logo.png;." --name "HRM" main.py
+
 
 
 

@@ -1,9 +1,3 @@
-#      Project        :   مسابقة تقافية 
-#      Date           :   13-08-2025
-#      Author         :   Seyf Eddine
-#      Gmail          :   seyfeddine.freelance@gmail.com
-#      WhatsApp       :   (+213) 794 87 85 08
-#      Python         :   3.12.10
 
 
 
@@ -1305,7 +1299,6 @@ class CustodyViewer:
         """
         
         df = self.db_conn.execute_query(query, fetch=True)
-        # df = df.dropna(subset=['id', 'employee_id', 'passport_number', 'custodian'])
         df = df.fillna("غير موجود")
 
         if df is None or df.empty:
@@ -1346,7 +1339,6 @@ class EmployeeDataHandler:
     def _get_or_create(self, table, name):
         """Ensure foreign key exists and return its ID."""
         if pd.isna(name):
-            # print(f"[WARN] {table}: name is NaN")
             return None
         name = str(name).strip()
         # Check if exists
@@ -1354,17 +1346,14 @@ class EmployeeDataHandler:
             f"SELECT id FROM {table} WHERE name = ?", (name,), fetch=True
         )
         if not res.empty:
-            # print(f"[INFO] {table}: Found existing '{name}' with ID {res.iloc[0]['id']}")
             return int(res.iloc[0]['id'])
         # Insert new row
         try:
             new_id = int(self.db_conn.execute_query(
                 f"INSERT INTO {table} (name) VALUES (?)", (name,), return_id=True
             ))
-            # print(f"[INFO] {table}: Created '{name}' with ID {new_id}")
             return new_id
         except Exception as e:
-            # print(f"[ERROR] Could not create {table} '{name}': {e}")
             return None
 
     def export_selected_data(self, selected_ids):
@@ -1401,13 +1390,10 @@ class EmployeeDataHandler:
         obj_cols = df.select_dtypes(include="object").columns
         df[obj_cols] = df[obj_cols].apply(lambda col: col.map(lambda x: x.strip() if isinstance(x, str) else x))
         df = df.dropna(how="all")
-        # print("[INFO] Loaded DataFrame:")
-        # print(df)
 
         not_created, errors = [], []
 
         for idx, row in df.iterrows():
-            # print(f"\n[INFO] Processing row {idx+2}")
             try:
                 dept_id = self._get_or_create("department_types", row.get("القسم"))
                 job_id = self._get_or_create("job_titles", row.get("المسمى_الوظيفي"))
@@ -1415,7 +1401,6 @@ class EmployeeDataHandler:
                 visa_type_id = self._get_or_create("visa_types", row.get("نوع_التأشيرة"))
 
                 if dept_id is None or job_id is None:
-                    # print(f"[WARN] Skipping row {idx+2}: missing department or job")
                     not_created.append({"الرقم_العام": row.get("الرقم_العام"), "الاسم_بالعربي": row.get("الاسم_بالعربي")})
                     continue
 
@@ -1428,7 +1413,6 @@ class EmployeeDataHandler:
                 if not emp.empty:
                     not_created.append({"الرقم_العام": general_number, "الاسم_بالعربي": row.get("الاسم_بالعربي")})
                     employee_id = emp.iloc[0]["id"]
-                    # print(f"[INFO] Employee {general_number} already exists with ID {employee_id}")
                 else:
                     employee_id = self.db_conn.execute_query("""
                         INSERT INTO employees (general_number, name_ar, name_en, birth_date,
@@ -1441,7 +1425,6 @@ class EmployeeDataHandler:
                         row.get("تاريخ_بداية_الهوية"), row.get("تاريخ_نهاية_الهوية"),
                         dept_id, job_id, row.get("رقم_الهاتف"), row.get("رقم_الايبان", ""), None
                     ), return_id=True)
-                    # print(f"[INFO] Created employee {general_number} with ID {employee_id}")
 
                 passport_id = None
                 if pd.notna(row.get("رقم_الجواز")):
@@ -1452,7 +1435,6 @@ class EmployeeDataHandler:
                     )
                     if not r.empty:
                         passport_id = int(r.iloc[0]["id"])
-                        # print(f"[INFO] Passport {passport_number} exists with ID {passport_id}")
                     elif passport_type_id:
                         passport_id = self.db_conn.execute_query("""
                             INSERT INTO passports (employee_id, passport_number, passport_type_id,
@@ -1486,10 +1468,7 @@ class EmployeeDataHandler:
             except Exception as row_err:
                 error_msg = f"صف {idx+2}: {row_err}"
                 errors.append(error_msg)
-                # print(f"[ERROR] {error_msg}")
 
-        # print("\n[SUMMARY] Not created:", not_created)
-        # print("[SUMMARY] Errors:", errors)
         return {"not_created": not_created, "errors": errors}
 
 
@@ -2077,7 +2056,6 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
                     text = "مستلم" if row['custodian'] == "الموظف" else "غير مستلم"
                 elif col == 'received_at':
                     text = row['received_at'][:10] if pd.notna(row['received_at']) else ""
-                    # text = row['received_at'].strftime("%Y-%m-%d") if pd.notna(row['received_at']) else ""
                 else:
                     text = str(row[col]) if row[col] else ""
                 item = QtWidgets.QTableWidgetItem(text)

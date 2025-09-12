@@ -7,7 +7,7 @@
 
 
 
-import os ,sys, shutil, sqlite3
+import os, sys, shutil, sqlite3
 import pandas as pd
 from datetime import datetime
 from hijridate import Gregorian
@@ -181,7 +181,7 @@ class DB_conn:
         cnx.execute("PRAGMA foreign_keys = ON")
         return cnx
 
-    def _execute_query(self, query, data=None, fetch=False, return_id=False):
+    def execute_query(self, query, data=None, fetch=False, return_id=False):
         cnx = self._get_connection()
         cur = cnx.cursor()
         try:
@@ -209,7 +209,7 @@ class DB_conn:
             return f"جدول {table} غير موجود"
         placeholders = ', '.join(['?' for _ in columns[1:]])  # استبعاد id
         query = f'INSERT INTO {table} ({",".join(columns[1:])}) VALUES ({placeholders})'
-        return self._execute_query(query, data, return_id=True)
+        return self.execute_query(query, data, return_id=True)
 
     def update(self, table, data, ids):
         columns = self.switch_cols.get(table)
@@ -218,19 +218,19 @@ class DB_conn:
         set_clause = ', '.join([f'{col}=?' for col in columns[1:]])  # استبعاد id
         query = f'UPDATE {table} SET {set_clause} WHERE id=?'
         vals = data + [ids[0]]  # ids[0] يجب أن يحتوي على الـ id
-        return self._execute_query(query, vals)
+        return self.execute_query(query, vals)
 
     def select(self, table):
         query = f'SELECT * FROM {table}'
-        return self._execute_query(query, fetch=True)
+        return self.execute_query(query, fetch=True)
 
     def delete(self, table, ids):
         query = f'DELETE FROM {table} WHERE id=?'
-        return self._execute_query(query, ids)
+        return self.execute_query(query, ids)
 
     def delete_all(self, table):
         query = f'DELETE FROM {table}'
-        return self._execute_query(query)
+        return self.execute_query(query)
     
 
 class ManageTypesDialog(QtWidgets.QDialog):
@@ -839,7 +839,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
     # Employee data
     def load_employee_data(self):
         if not self.employee__id: return
-        df = self.db_conn._execute_query(
+        df = self.db_conn.execute_query(
             "SELECT * FROM employees WHERE id=?", [self.employee__id], fetch=True
         )
         if df.empty: return
@@ -965,7 +965,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
         if not self.employee__id:
             return
         
-        df = self.db_conn._execute_query(
+        df = self.db_conn.execute_query(
             """
             SELECT 
                 p.id, 
@@ -1058,7 +1058,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
             return
 
         passport_id = int(passport_id_item.text())
-        df = self.db_conn._execute_query("SELECT * FROM passports WHERE id=?", [passport_id], fetch=True)
+        df = self.db_conn.execute_query("SELECT * FROM passports WHERE id=?", [passport_id], fetch=True)
         if df.empty:
             return
 
@@ -1102,7 +1102,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
         self.visa_types = {row['id']: row['name'] for _, row in df_types.iterrows()}
 
     def load_visas_for_passport(self, passport_id):
-        df = self.db_conn._execute_query(
+        df = self.db_conn.execute_query(
             """
             SELECT 
                 v.id, 
@@ -1159,7 +1159,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
             return
 
         visa_id = int(visa_id_item.text())
-        df = self.db_conn._execute_query("SELECT * FROM visas WHERE id=?", [visa_id], fetch=True)
+        df = self.db_conn.execute_query("SELECT * FROM visas WHERE id=?", [visa_id], fetch=True)
         if df.empty:
             return
 
@@ -1301,7 +1301,7 @@ class CustodyViewer:
             ORDER BY p.received_at DESC
         """
         
-        df = self.db_conn._execute_query(query, fetch=True)
+        df = self.db_conn.execute_query(query, fetch=True)
         # df = df.dropna(subset=['id', 'employee_id', 'passport_number', 'custodian'])
         df = df.fillna("غير موجود")
 
@@ -1346,7 +1346,7 @@ class EmployeeDataHandler:
             return None
         name = str(name).strip()
         # Check if exists
-        res = self.db_conn._execute_query(
+        res = self.db_conn.execute_query(
             f"SELECT id FROM {table} WHERE name = ?", (name,), fetch=True
         )
         if not res.empty:
@@ -1354,7 +1354,7 @@ class EmployeeDataHandler:
             return int(res.iloc[0]['id'])
         # Insert new row
         try:
-            new_id = int(self.db_conn._execute_query(
+            new_id = int(self.db_conn.execute_query(
                 f"INSERT INTO {table} (name) VALUES (?)", (name,), return_id=True
             ))
             # print(f"[INFO] {table}: Created '{name}' with ID {new_id}")
@@ -1389,7 +1389,7 @@ class EmployeeDataHandler:
         LEFT JOIN visa_types vt ON v.visa_type_id = vt.id
         WHERE e.id IN ({placeholders})
         """
-        return self.db_conn._execute_query(query, data=selected_ids, fetch=True)
+        return self.db_conn.execute_query(query, data=selected_ids, fetch=True)
 
     def import_data(self, file_path):
         """Imports data from Excel and returns a dict with status info."""
@@ -1416,7 +1416,7 @@ class EmployeeDataHandler:
                     continue
 
                 general_number = int(row.get("الرقم_العام"))
-                emp = self.db_conn._execute_query(
+                emp = self.db_conn.execute_query(
                     "SELECT id FROM employees WHERE general_number = ?",
                     (general_number,), fetch=True
                 )
@@ -1426,7 +1426,7 @@ class EmployeeDataHandler:
                     employee_id = emp.iloc[0]["id"]
                     # print(f"[INFO] Employee {general_number} already exists with ID {employee_id}")
                 else:
-                    employee_id = self.db_conn._execute_query("""
+                    employee_id = self.db_conn.execute_query("""
                         INSERT INTO employees (general_number, name_ar, name_en, birth_date,
                                                national_id, id_issue_date, id_expiry_date,
                                                department_id, job_title_id, phone, iban_number, role)
@@ -1442,7 +1442,7 @@ class EmployeeDataHandler:
                 passport_id = None
                 if pd.notna(row.get("رقم_الجواز")):
                     passport_number = str(row.get("رقم_الجواز")).split(".")[0]  # handle floats
-                    r = self.db_conn._execute_query(
+                    r = self.db_conn.execute_query(
                         "SELECT id FROM passports WHERE passport_number = ?",
                         (passport_number,), fetch=True
                     )
@@ -1450,7 +1450,7 @@ class EmployeeDataHandler:
                         passport_id = int(r.iloc[0]["id"])
                         # print(f"[INFO] Passport {passport_number} exists with ID {passport_id}")
                     elif passport_type_id:
-                        passport_id = self.db_conn._execute_query("""
+                        passport_id = self.db_conn.execute_query("""
                             INSERT INTO passports (employee_id, passport_number, passport_type_id,
                                                    issue_date, expiry_date, custodian)
                             VALUES (?, ?, ?, ?, ?, ?)
@@ -1464,12 +1464,12 @@ class EmployeeDataHandler:
 
                 if pd.notna(row.get("رقم_التأشيرة")) and passport_id and visa_type_id:
                     visa_number = str(row.get("رقم_التأشيرة")).split(".")[0]
-                    r = self.db_conn._execute_query(
+                    r = self.db_conn.execute_query(
                         "SELECT id FROM visas WHERE visa_number = ?",
                         (visa_number,), fetch=True
                     )
                     if r.empty:
-                        self.db_conn._execute_query("""
+                        self.db_conn.execute_query("""
                             INSERT INTO visas (passport_id, visa_number, visa_type_id, issue_date, expiry_date) VALUES (?, ?, ?, ?, ?)
                         """, (
                             passport_id, visa_number, visa_type_id,
@@ -1639,9 +1639,9 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         )
         if reply == QtWidgets.QMessageBox.Yes:
             # حذف التأشيرات والجوازات أولاً إذا كانت مربوطة
-            self.db_conn._execute_query("DELETE FROM visas WHERE passport_id IN (SELECT id FROM passports WHERE employee_id=?)", [emp_id])
-            self.db_conn._execute_query("DELETE FROM passports WHERE employee_id=?", [emp_id])
-            self.db_conn._execute_query("DELETE FROM employees WHERE id=?", [emp_id])
+            self.db_conn.execute_query("DELETE FROM visas WHERE passport_id IN (SELECT id FROM passports WHERE employee_id=?)", [emp_id])
+            self.db_conn.execute_query("DELETE FROM passports WHERE employee_id=?", [emp_id])
+            self.db_conn.execute_query("DELETE FROM employees WHERE id=?", [emp_id])
             docs_folder = "documents/" + str(item.text(1))
             if os.path.exists(docs_folder):
                 def remove_readonly(func, path, excinfo):
@@ -1757,7 +1757,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
 
     def load_all_employees(self):
         """تحميل كل بيانات الموظفين مرة واحدة فقط"""
-        self.employees_data = self.db_conn._execute_query("""
+        self.employees_data = self.db_conn.execute_query("""
             SELECT 
                 e.general_number,
                 e.name_ar,
@@ -1823,7 +1823,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         if selected_visa_ids:
             valid_ids = set()
             for emp_id in filtered_data['id']:
-                visas = self.db_conn._execute_query("""
+                visas = self.db_conn.execute_query("""
                     SELECT v.visa_type_id
                     FROM visas v
                     LEFT JOIN passports p ON v.passport_id = p.id
@@ -1887,7 +1887,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             )
 
             # جلب الجوازات والتأشيرات فقط في حالة عرض البيانات الكاملة
-            passports = self.db_conn._execute_query("""
+            passports = self.db_conn.execute_query("""
                 SELECT 
                     p.passport_number,
                     t.name AS passport_type,
@@ -1916,7 +1916,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
                 self.set_item_bg(pp_item, "#e0ffd6")
                 emp_item.addChild(pp_item)
 
-                visas = self.db_conn._execute_query("""
+                visas = self.db_conn.execute_query("""
                     SELECT 
                         v.visa_number,
                         t.name AS visa_type,
@@ -2056,7 +2056,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         if where_clause:
             query += " WHERE " + where_clause
     
-        df = self.db_conn._execute_query(query, params or [], fetch=True)
+        df = self.db_conn.execute_query(query, params or [], fetch=True)
     
         if not hasattr(df, "iterrows"):
             QtWidgets.QMessageBox.warning(self, "خطأ", f"فشل تحميل الجوازات: {df}")
@@ -2167,14 +2167,14 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             # تحديث جدول passports + الأعمدة الجديدة
             passport_ids = [pid for pid, _ in ids_to_update]
             placeholders = ','.join(['?'] * len(passport_ids))
-            self.db_conn._execute_query(
+            self.db_conn.execute_query(
                 f"""UPDATE passports SET custodian=?, received_at=CURRENT_TIMESTAMP  WHERE id IN ({placeholders})""",
                 [new_status] + passport_ids
             )
     
             # تسجيل handover
             for passport_id, employee_id in ids_to_update:
-                self.db_conn._execute_query(
+                self.db_conn.execute_query(
                     """INSERT INTO handover (passport_id, employee_id, action_type, action_at)
                        VALUES (?, ?, ?, ?)""",
                     (passport_id, employee_id, action_text, now)
@@ -2236,7 +2236,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         FROM passports p
         LEFT JOIN employees e ON e.id = p.employee_id
         """
-        df = self.db_conn._execute_query(query, fetch=True)
+        df = self.db_conn.execute_query(query, fetch=True)
         self.show_passports(self._filter_by_days(df, days, "expiry_date"))
 
     def filter_visas(self, days):
@@ -2246,7 +2246,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         LEFT JOIN passports p ON p.id = v.passport_id
         LEFT JOIN employees e ON e.id = p.employee_id
         """
-        df = self.db_conn._execute_query(query, fetch=True)
+        df = self.db_conn.execute_query(query, fetch=True)
         self.show_visas(self._filter_by_days(df, days, "expiry_date"))
 
     def _filter_by_days(self, df, days, date_col):
@@ -2300,7 +2300,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             return
     
         query = "SELECT username, password FROM user WHERE id = 1"
-        result = self.db_conn._execute_query(query, fetch=True)
+        result = self.db_conn.execute_query(query, fetch=True)
     
         if isinstance(result, pd.DataFrame) and not result.empty:
             db_username = str(result.at[0, 'username']).strip()
@@ -2324,14 +2324,14 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
     
         try:
             check_query = "SELECT * FROM user WHERE id=1"
-            result = self.db_conn._execute_query(check_query, fetch=True)
+            result = self.db_conn.execute_query(check_query, fetch=True)
     
             if isinstance(result, pd.DataFrame) and not result.empty:
                 update_query = "UPDATE user SET username=?, password=? WHERE id=1"
-                self.db_conn._execute_query(update_query, [username, password])
+                self.db_conn.execute_query(update_query, [username, password])
             else:
                 insert_query = "INSERT INTO user (username, password, id) VALUES (?, ?, ?)"
-                self.db_conn._execute_query(insert_query, [username, password, 1])
+                self.db_conn.execute_query(insert_query, [username, password, 1])
     
             QtWidgets.QMessageBox.information(self, "نجاح", "تم تحديث بيانات الدخول بنجاح!")
     

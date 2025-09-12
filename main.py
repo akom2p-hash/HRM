@@ -1998,9 +1998,11 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.information(self, "نجاح", "تم استيراد البيانات بنجاح ✅")
             self.refresh_emloyees()
 
-
     def toggle_select_all(self, state):
-        self.table_passport_custody.selectAll() if state == QtCore.Qt.Checked else self.table_passport_custody.clearSelection()
+        if state == QtCore.Qt.Checked:
+            self.table_passport_custody.selectAll()
+        else:
+            self.table_passport_custody.clearSelection()
         self.table_passport_custody.setFocus()
 
     def setup_custody_passports_table(self):
@@ -2379,5 +2381,6 @@ if __name__ == '__main__':
 # pyuic5 ui/EditEmployeePage.ui -o EditEmployeePage.py
 # pyrcc5 ui/img/img.qrc -o img_rc.py
 # pyinstaller --windowed --icon=ui\img\logo.ico --add-data="ui\img\logo.png;." --name "HRM" main.py
+
 
 

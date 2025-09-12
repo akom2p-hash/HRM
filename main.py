@@ -1,4 +1,4 @@
-import os, sys, shutil, sqlite3
+import os, sys, shutil, shlex, sqlite3
 import pandas as pd
 from datetime import datetime
 from hijridate import Gregorian
@@ -1229,9 +1229,9 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
             if sys.platform.startswith("win"):  # Windows
                 os.startfile(filePath)
             elif sys.platform == "darwin":  # macOS
-                os.system(f"open '{filePath}'")
+                os.system("open " + shlex.quote(filePath))
             else:  # Linux
-                os.system(f"xdg-open '{filePath}'")
+                os.system("xdg-open " + shlex.quote(filePath))
 
     def open_doc(self, path):
         if os.path.exists(path):
@@ -2369,6 +2369,7 @@ if __name__ == '__main__':
 # pyuic5 ui/EditEmployeePage.ui -o EditEmployeePage.py
 # pyrcc5 ui/img/img.qrc -o img_rc.py
 # pyinstaller --windowed --icon=ui\img\logo.ico --add-data="ui\img\logo.png;." --name "HRM" main.py
+
 
 
 

@@ -872,7 +872,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
             QtWidgets.QMessageBox.warning(
                 self,
                 "بيانات ناقصة",
-                f"الحقول التالية مطلوبة:\n- " + "\n- ".join(missing_fields)
+                "الحقول التالية مطلوبة:\n- " + "\n- ".join(missing_fields)
             )
             return None 
         
@@ -2283,7 +2283,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         password = self.PassEntry.text()
     
         if not username or not password:
-            QtWidgets.QMessageBox.warning(self, "خطأ", f"يرجى إدخال اسم المستخدم وكلمة المرور!")
+            QtWidgets.QMessageBox.warning(self, "خطأ", "يرجى إدخال اسم المستخدم وكلمة المرور!")
             return
     
         query = "SELECT username, password FROM user WHERE id = 1"
@@ -2330,7 +2330,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
 
     def update_datetime(self):
         today = datetime.today()
-        MyTime = datetime.now().strftime(f"%H:%M")
+        MyTime = datetime.now().strftime("%H:%M")
         HijriDate = Gregorian(today.year, today.month, today.day).to_hijri()        
 
         # تعريف أسماء الأيام والأشهر بالعربي

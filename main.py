@@ -8,9 +8,7 @@
 
 import os
 import sys
-import shlex
 import shutil
-import subprocess
 import sqlite3
 import logging
 import pandas as pd
@@ -1248,6 +1246,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
         else:
             QtWidgets.QMessageBox.warning(self, "خطأ", f"الملف غير موجود:\n{path}")
 
+    @staticmethod
     def _is_safe_path(self, base_dir: str, target_path: str) -> bool:
         try:
             base_abs = os.path.abspath(base_dir)

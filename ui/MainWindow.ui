@@ -616,7 +616,7 @@ QGroupBox QRadioButton {
                   <item row="0" column="5">
                    <widget class="QLabel" name="label_5">
                     <property name="text">
-                     <string>الرتبة</string>
+                     <string>الربتة العسكرية</string>
                     </property>
                    </widget>
                   </item>
@@ -640,7 +640,7 @@ QGroupBox QRadioButton {
                   <item row="2" column="1">
                    <widget class="QCheckBox" name="rolecheckBox2">
                     <property name="text">
-                     <string>ضابط</string>
+                     <string>ظابط</string>
                     </property>
                    </widget>
                   </item>
@@ -967,6 +967,9 @@ QGroupBox QRadioButton {
                       <height>0</height>
                      </size>
                     </property>
+                    <property name="text">
+                     <string/>
+                    </property>
                     <property name="placeholderText">
                      <string>اسم الموظف</string>
                     </property>
@@ -1031,7 +1034,7 @@ QGroupBox QRadioButton {
                  <item>
                   <widget class="QPushButton" name="btn_deliver_custody">
                    <property name="text">
-                    <string>تسليم للموظف</string>
+                    <string>تسليم للعسكري</string>
                    </property>
                    <property name="icon">
                     <iconset resource="img/img.qrc">
@@ -1048,7 +1051,7 @@ QGroupBox QRadioButton {
                  <item>
                   <widget class="QPushButton" name="btn_receive_custody">
                    <property name="text">
-                    <string>استلام من الموظف</string>
+                    <string>استلام من العسكري</string>
                    </property>
                    <property name="icon">
                     <iconset resource="img/img.qrc">
@@ -1267,7 +1270,7 @@ QGroupBox QRadioButton {
                <item row="1" column="0">
                 <widget class="QGroupBox" name="groupBox_employee_custody">
                  <property name="title">
-                  <string>جوازات بعهدة الموظف:</string>
+                  <string>جوازات بعهدة العسكري:</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_employee_custody">
                   <item>
@@ -1283,7 +1286,7 @@ QGroupBox QRadioButton {
                <item row="1" column="2">
                 <widget class="QGroupBox" name="groupBox_company_custody">
                  <property name="title">
-                  <string>جوازات بعهدة الشركة:</string>
+                  <string>جوازات بعهدة الخطط والمهام :</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_company_custody">
                   <item>
@@ -1669,7 +1672,7 @@ font: 75 18pt &quot;Dubai&quot;;
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>الموظفين</string>
+              <string>بيانات العسكر</string>
              </property>
              <property name="iconSize">
               <size>
@@ -1685,7 +1688,7 @@ font: 75 18pt &quot;Dubai&quot;;
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>العهدة</string>
+              <string>استلام/تسليم</string>
              </property>
              <property name="iconSize">
               <size>
@@ -1701,7 +1704,7 @@ font: 75 18pt &quot;Dubai&quot;;
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>التنبيهات</string>
+              <string>تبنيهات انتهاء</string>
              </property>
              <property name="iconSize">
               <size>
@@ -1717,7 +1720,7 @@ font: 75 18pt &quot;Dubai&quot;;
               <enum>Qt::RightToLeft</enum>
              </property>
              <property name="text">
-              <string>الوثائق</string>
+              <string>استلام/تسليم</string>
              </property>
              <property name="iconSize">
               <size>

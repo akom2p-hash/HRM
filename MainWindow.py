@@ -11,7 +11,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow:
+class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1455, 924)
@@ -436,6 +436,7 @@ class Ui_MainWindow:
         self.gridLayout_7.addWidget(self.deliveredByLineEdit, 0, 2, 1, 1)
         self.employeeNameLineEdit = QtWidgets.QLineEdit(self.TopFrame_3)
         self.employeeNameLineEdit.setMinimumSize(QtCore.QSize(400, 0))
+        self.employeeNameLineEdit.setText("")
         self.employeeNameLineEdit.setObjectName("employeeNameLineEdit")
         self.gridLayout_7.addWidget(self.employeeNameLineEdit, 0, 0, 1, 2)
         self.receivedByLineEdit = QtWidgets.QLineEdit(self.TopFrame_3)
@@ -769,11 +770,11 @@ class Ui_MainWindow:
         self.ExitButton.setText(_translate("MainWindow", "الغاء"))
         self.DateLabel.setText(_translate("MainWindow", "الخميس 20 صفر 1447 هـ / 14 أغسطس 2025 م"))
         self.label_6.setText(_translate("MainWindow", "البحث"))
-        self.label_7.setText(_translate("MainWindow", "القسم"))
-        self.label_5.setText(_translate("MainWindow", "الرتبة"))
+        self.label_7.setText(_translate("MainWindow", "الوحدة"))
+        self.label_5.setText(_translate("MainWindow", "الربتة العسكرية"))
         self.rolecheckBox1.setText(_translate("MainWindow", "فرد"))
         self.label.setText(_translate("MainWindow", "نوع التأشيرة"))
-        self.rolecheckBox2.setText(_translate("MainWindow", "ضابط"))
+        self.rolecheckBox2.setText(_translate("MainWindow", "ظابط"))
         self.SearchEntry.setPlaceholderText(_translate("MainWindow", "ابجث بالاسم, الرقم, الهاتف ..."))
         self.SearchButton.setText(_translate("MainWindow", "بحث"))
         self.ExportExcelButton.setText(_translate("MainWindow", "Excel  تصدير "))
@@ -789,8 +790,8 @@ class Ui_MainWindow:
         self.searchButton.setText(_translate("MainWindow", "    بحث "))
         self.notReceivedCheckBox.setText(_translate("MainWindow", "غير مستلم"))
         self.receivedCheckBox.setText(_translate("MainWindow", "مستلم"))
-        self.btn_deliver_custody.setText(_translate("MainWindow", "تسليم للموظف"))
-        self.btn_receive_custody.setText(_translate("MainWindow", "استلام من الموظف"))
+        self.btn_deliver_custody.setText(_translate("MainWindow", "تسليم للعسكري"))
+        self.btn_receive_custody.setText(_translate("MainWindow", "استلام من العسكري"))
         self.selectAllCheckBox.setText(_translate("MainWindow", "تحديد الكل"))
         self.refrech_passport_custody.setText(_translate("MainWindow", "تحديث"))
         self.label_visas.setText(_translate("MainWindow", "التأشيرات التي ستنتهي صلاحيتها:"))
@@ -811,8 +812,8 @@ class Ui_MainWindow:
         self.rb_pass_60.setText(_translate("MainWindow", "خلال 60 يوم"))
         self.rb_pass_90.setText(_translate("MainWindow", "خلال 90 يوم"))
         self.rb_pass_180.setText(_translate("MainWindow", "خلال 180 يوم"))
-        self.groupBox_employee_custody.setTitle(_translate("MainWindow", "جوازات بعهدة الموظف:"))
-        self.groupBox_company_custody.setTitle(_translate("MainWindow", "جوازات بعهدة الشركة:"))
+        self.groupBox_employee_custody.setTitle(_translate("MainWindow", "جوازات بعهدة العسكري:"))
+        self.groupBox_company_custody.setTitle(_translate("MainWindow", "جوازات بعهدة الخطط والمهام :"))
         self.label_from.setText(_translate("MainWindow", "من"))
         self.label_to.setText(_translate("MainWindow", "الى"))
         self.btn_filter_employee_custody.setText(_translate("MainWindow", "تصفية"))
@@ -822,8 +823,9 @@ class Ui_MainWindow:
         self.lineEditUsername.setPlaceholderText(_translate("MainWindow", "أدخل اسم المستخدم الجديد"))
         self.labelTitle.setText(_translate("MainWindow", "تعديل بيانات الدخول"))
         self.btnSave.setText(_translate("MainWindow", "حفظ"))
-        self.NavBtn1.setText(_translate("MainWindow", "الموظفين"))
-        self.NavBtn2.setText(_translate("MainWindow", "العهدة"))
-        self.NavBtn3.setText(_translate("MainWindow", "التنبيهات"))
-        self.NavBtn4.setText(_translate("MainWindow", "الوثائق"))
+        self.NavBtn1.setText(_translate("MainWindow", "بيانات العسكر"))
+        self.NavBtn2.setText(_translate("MainWindow", "استلام/تسليم"))
+        self.NavBtn3.setText(_translate("MainWindow", "تبنيهات انتهاء"))
+        self.NavBtn4.setText(_translate("MainWindow", "استلام/تسليم"))
         self.LogoutButton.setText(_translate("MainWindow", "تسجيل الخروج"))
+import img_rc

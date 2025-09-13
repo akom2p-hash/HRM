@@ -1,4 +1,17 @@
-import os, sys, shutil, shlex, sqlite3
+#      Project        :   مسابقة تقافية 
+#      Date           :   13-08-2025
+#      Author         :   Seyf Eddine
+#      Gmail          :   seyfeddine.freelance@gmail.com
+#      WhatsApp       :   (+213) 794 87 85 08
+#      Python         :   3.12.10
+
+
+import os
+import sys
+import shlex
+import shutil
+import subprocess
+import sqlite3
 import logging
 import pandas as pd
 from datetime import datetime
@@ -31,14 +44,14 @@ class DB_conn:
             ],
             'visas': [
                 'id', 'passport_id', 'visa_number', 'visa_type_id', 'issue_date', 'expiry_date',
-                'doc_path' 
+                'doc_path'
             ]
         }
 
         if not os.path.exists(self.database):
             os.makedirs(os.path.dirname(self.database), exist_ok=True)
             self.init_db()
-          
+
     def init_db(self):
         try:
             cnx = sqlite3.connect(self.database)
@@ -86,7 +99,7 @@ class DB_conn:
             )
             """)
 
-            # جدول الموظفين
+            # جدول العسكر
             cur.execute("""
             CREATE TABLE IF NOT EXISTS employees (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -181,13 +194,14 @@ class DB_conn:
                 cur.execute(query, data)
             else:
                 cur.execute(query)
+
             if fetch or query.strip().lower().startswith('select'):
                 df = pd.read_sql_query(query, cnx, params=data)
                 return df
+
             cnx.commit()
             if return_id:
-                return cur.lastrowid  # إرجاع الـ ID
-            
+                return cur.lastrowid
             return "تمت العملية بنجاح"
         except Exception as err:
             return f"حدث خطأ: {str(err)}"
@@ -196,34 +210,40 @@ class DB_conn:
             cnx.close()
 
     def insert(self, table, data):
-        columns = self.switch_cols.get(table)
-        if not columns:
+        if table not in self.switch_cols:
             return f"جدول {table} غير موجود"
-        placeholders = ', '.join(['?' for _ in columns[1:]])  # استبعاد id
-        query = f'INSERT INTO {table} ({",".join(columns[1:])}) VALUES ({placeholders})'
+        cols = self.switch_cols[table][1:]  # بدون id
+        placeholders = ', '.join(['?' for _ in cols])
+        query = f'INSERT INTO "{table}" ({",".join(cols)}) VALUES ({placeholders})'
         return self.execute_query(query, data, return_id=True)
 
     def update(self, table, data, ids):
-        columns = self.switch_cols.get(table)
-        if not columns:
+        if table not in self.switch_cols:
             return f"جدول {table} غير موجود"
-        set_clause = ', '.join([f'{col}=?' for col in columns[1:]])  # استبعاد id
-        query = f'UPDATE {table} SET {set_clause} WHERE id=?'
-        vals = data + [ids[0]]  # ids[0] يجب أن يحتوي على الـ id
+        cols = self.switch_cols[table][1:]  # بدون id
+        set_clause = ', '.join([f'{col}=?' for col in cols])
+        query = f'UPDATE "{table}" SET {set_clause} WHERE id=?'
+        vals = data + [ids[0]]
         return self.execute_query(query, vals)
 
     def select(self, table):
-        query = f'SELECT * FROM {table}'
+        if table not in self.switch_cols:
+            return f"جدول {table} غير موجود"
+        query = f'SELECT * FROM "{table}"'
         return self.execute_query(query, fetch=True)
 
     def delete(self, table, ids):
-        query = f'DELETE FROM {table} WHERE id=?'
+        if table not in self.switch_cols:
+            return f"جدول {table} غير موجود"
+        query = f'DELETE FROM "{table}" WHERE id=?'
         return self.execute_query(query, ids)
 
     def delete_all(self, table):
-        query = f'DELETE FROM {table}'
+        if table not in self.switch_cols:
+            return f"جدول {table} غير موجود"
+        query = f'DELETE FROM "{table}"'
         return self.execute_query(query)
-    
+
 
 class ManageTypesDialog(QtWidgets.QDialog):
     def __init__(self, db_conn, table_name, parent=None):
@@ -234,7 +254,7 @@ class ManageTypesDialog(QtWidgets.QDialog):
         # تحويل اسم الجدول إلى العربية للعرض
         self.ar_table_name = {
             'department_types': 'الأقسام',
-            'job_titles': 'المسمى الوظيفي',
+            'job_titles': 'الرتبة_العسكرية',
             'passport_types': 'أنواع الجوازات',
             'visa_types': 'أنواع التأشيرات'
         }.get(table_name, table_name)
@@ -443,7 +463,7 @@ class PassportDialog(QtWidgets.QDialog):
         layout.addRow("تاريخ الاستلام:", self.received_at)
         # على عهدة
         # self.custodian = QtWidgets.QComboBox()
-        # self.custodian.addItems(['الشركة', 'الموظف'])
+        # self.custodian.addItems(['الخطط_والمهام', 'العسكري'])
         # layout.addRow("على عهدة:", self.custodian)
 
         # صورة الجواز
@@ -506,7 +526,7 @@ class PassportDialog(QtWidgets.QDialog):
         self.received_at.setDate(QtCore.QDate.fromString(
             self.passport_data.get("received_at","1999-01-01"), "yyyy-MM-dd"
         ))
-        # custodian = self.passport_data.get("custodian","الشركة")
+        # custodian = self.passport_data.get("custodian","الخطط_والمهام")
         # idx = self.custodian.findText(custodian)
         # if idx >= 0:
         #     self.custodian.setCurrentIndex(idx)
@@ -539,7 +559,7 @@ class PassportDialog(QtWidgets.QDialog):
             self.delivered_by.text(),
             self.received_by.text(),
             self.received_at.text(),
-            self.passport_data.get("custodian", "الشركة"),# self.custodian.currentText(),
+            self.passport_data.get("custodian", "الخطط_والمهام"),# self.custodian.currentText(),
             doc_path
         ]
 
@@ -849,7 +869,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
         self.id_expiry_date.setDate(QtCore.QDate.fromString(self.employee_data.get("id_expiry_date","1999-01-01"), "yyyy-MM-dd"))
 
         role = self.employee_data.get("role", "فرد")
-        self.role_admin.setChecked(role=="مسؤول")
+        self.role_admin.setChecked(role=="ظابط")
         self.role_user.setChecked(role=="فرد")
 
         photo_path = self.employee_data.get("photo_path","")
@@ -859,7 +879,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
 
     def save_employee(self):
         required_fields = {
-            "الرقم_العام": self.general_number.text(),
+            "الرقم_العسكري": self.general_number.text(),
             "رقم الهوية": self.national_id.text(),
             "الاسم بالعربية": self.name_ar.text(),
             "الاسم بالإنجليزية": self.name_en.text(),
@@ -893,21 +913,21 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
             self.job_title.currentData(),
             self.phone.text(),
             self.iban_number.text(),
-            "مسؤول" if self.role_admin.isChecked() else "فرد",
+            "ظابط" if self.role_admin.isChecked() else "فرد",
             photo_path,
             self.docs_folder
         ]
   
         if self.employee__id:
             self.db_conn.update('employees', data, [self.employee__id])
-            QMessageBox.information(self, "نجاح", "تم تعديل الموظف بنجاح")
+            QMessageBox.information(self, "نجاح", "تم تعديل العسكري بنجاح")
         else:
             new_id = self.db_conn.insert('employees', data)
             if isinstance(new_id, int):
                 self.employee__id = new_id
                 self.tabWidget.setTabEnabled(1, True)
                 self.tabWidget.setTabEnabled(2, True)
-                QMessageBox.information(self, "نجاح", f"تم إضافة الموظف بنجاح، رقم التعريف: {new_id}")
+                QMessageBox.information(self, "نجاح", f"تم إضافة العسكري بنجاح، رقم التعريف: {new_id}")
             else:
                 QMessageBox.warning(self, "خطأ", str(new_id))
 
@@ -991,7 +1011,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
         for i, row in df.iterrows():
             # for j, col in enumerate(df.columns): dont use loop
             #     if col == 'custodian':
-            #         text = "مستلم" if row['custodian'] == "الموظف" else "غير مستلم"
+            #         text = "مستلم" if row['custodian'] == "العسكري" else "غير مستلم"
             #     else:
             #         text = str(row[col]) if row[col] else ""
             #     item = QtWidgets.QTableWidgetItem(text)
@@ -1002,7 +1022,7 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
             self.table_passport.setItem(i, 3, QtWidgets.QTableWidgetItem(str(row["issue_date"])))
             self.table_passport.setItem(i, 4, QtWidgets.QTableWidgetItem(str(row["expiry_date"])))
             self.table_passport.setItem(i, 5, QtWidgets.QTableWidgetItem(str(row["issue_authority"])))
-            custodian_text = "مستلم" if row["custodian"] == "الموظف" else "غير مستلم"
+            custodian_text = "مستلم" if row["custodian"] == "العسكري" else "غير مستلم"
             self.table_passport.setItem(i, 6, QtWidgets.QTableWidgetItem(custodian_text))
 
             doc_path = str(row["doc_path"]) if row["doc_path"] else ""
@@ -1222,23 +1242,40 @@ class EditEmployeeDialog(Ui_EditEmployeeDialog, QtWidgets.QDialog):
                 os.remove(filePath)
             self.load_documents()
 
-    def open_document(self):
-        """فتح المستند المحدد بالبرنامج الافتراضي"""
-        selected = self.documentsTree.currentItem()
-        if selected:
-            filePath = os.path.join(self.docs_folder, selected.text())
-            if sys.platform.startswith("win"):  # Windows
-                os.startfile(filePath)
-            elif sys.platform == "darwin":  # macOS
-                os.system("open " + shlex.quote(filePath))
-            else:  # Linux
-                os.system("xdg-open " + shlex.quote(filePath))
-
     def open_doc(self, path):
         if os.path.exists(path):
             QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(path))
         else:
             QtWidgets.QMessageBox.warning(self, "خطأ", f"الملف غير موجود:\n{path}")
+
+    def _is_safe_path(self, base_dir: str, target_path: str) -> bool:
+        try:
+            base_abs = os.path.abspath(base_dir)
+            target_abs = os.path.abspath(target_path)
+        except Exception:
+            return False
+        return target_abs == base_abs or target_abs.startswith(base_abs + os.sep)
+
+    def open_document(self):
+        """فتح المستند المحدد بالبرنامج الافتراضي (Qt method — آمنة من ناحية static analysis)"""
+        selected = self.documentsTree.currentItem()
+        if not selected:
+            return
+
+        file_path = os.path.join(self.docs_folder, selected.text())
+
+        if not os.path.exists(file_path):
+            QtWidgets.QMessageBox.warning(self, "خطأ", f"الملف غير موجود:\n{file_path}")
+            return
+
+        if not self._is_safe_path(self.docs_folder, file_path):
+            QtWidgets.QMessageBox.warning(self, "خطأ", "الوصول إلى هذا الملف غير مسموح.")
+            return
+
+        # Use Qt to open the file with the system default application
+        opened = QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(file_path))
+        if not opened:
+            QtWidgets.QMessageBox.critical(self, "خطأ", "تعذر فتح الملف بواسطة النظام.")
 
 
 class CustodyViewer:
@@ -1264,7 +1301,7 @@ class CustodyViewer:
     def setup_employee_table(self):
         self.table_employee_custody.setColumnCount(6)
         self.table_employee_custody.setHorizontalHeaderLabels([
-            "ID", "emp_ID", "اسم الموظف", "رقم الجواز", "نوع الجواز", "تاريخ التسليم"
+            "ID", "emp_ID", "اسم العسكري", "رقم الجواز", "نوع الجواز", "تاريخ التسليم"
         ])
         header = self.table_employee_custody.horizontalHeader()
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
@@ -1275,7 +1312,7 @@ class CustodyViewer:
     def setup_company_table(self):
         self.table_company_custody.setColumnCount(5)
         self.table_company_custody.setHorizontalHeaderLabels([
-            "ID", "emp_ID", "اسم الموظف", "رقم الجواز", "نوع الجواز" #, "تاريخ الإستلام"
+            "ID", "emp_ID", "اسم العسكري", "رقم الجواز", "نوع الجواز" #, "تاريخ الإستلام"
         ])
         header = self.table_company_custody.horizontalHeader()
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
@@ -1304,8 +1341,8 @@ class CustodyViewer:
             self.table_company_custody.setRowCount(0)
             return
 
-        df_employee = df[df['custodian'] == "الموظف"].reset_index(drop=True)
-        df_company = df[df['custodian'] == "الشركة"].reset_index(drop=True)
+        df_employee = df[df['custodian'] == "العسكري"].reset_index(drop=True)
+        df_company = df[df['custodian'] == "الخطط_والمهام"].reset_index(drop=True)
 
         df_employee["received_at"] = pd.to_datetime(df_employee["received_at"], errors="coerce")
         
@@ -1363,9 +1400,9 @@ class EmployeeDataHandler:
         placeholders = ",".join(["?"] * len(selected_ids))
         query = f"""
         SELECT 
-            e.general_number AS الرقم_العام, e.name_ar AS الاسم_بالعربي,
-            e.name_en AS الاسم_بالانجليزي, j.name AS المسمى_الوظيفي,
-            d.name AS القسم, e.iban_number AS رقم_الايبان, e.phone AS رقم_الهاتف, e.birth_date AS تاريخ_الميلاد,
+            e.general_number AS الرقم_العسكري, e.name_ar AS الاسم_بالعربي,
+            e.name_en AS الاسم_بالانجليزي, j.name AS الرتبة_العسكرية,
+            d.name AS الوحدة, e.iban_number AS رقم_الايبان, e.phone AS رقم_الهاتف, e.birth_date AS تاريخ_الميلاد,
             e.national_id AS رقم_بطاقة_الهوية, e.id_issue_date AS تاريخ_بداية_الهوية,
             e.id_expiry_date AS تاريخ_نهاية_الهوية,
             p.passport_number AS رقم_الجواز, p.issue_date AS تاريخ_بداية_الجواز,
@@ -1394,23 +1431,23 @@ class EmployeeDataHandler:
 
         for idx, row in df.iterrows():
             try:
-                dept_id = self._get_or_create("department_types", row.get("القسم"))
-                job_id = self._get_or_create("job_titles", row.get("المسمى_الوظيفي"))
+                dept_id = self._get_or_create("department_types", row.get("الوحدة"))
+                job_id = self._get_or_create("job_titles", row.get("الرتبة_العسكرية"))
                 passport_type_id = self._get_or_create("passport_types", row.get("نوع_الجواز"))
                 visa_type_id = self._get_or_create("visa_types", row.get("نوع_التأشيرة"))
 
                 if dept_id is None or job_id is None:
-                    not_created.append({"الرقم_العام": row.get("الرقم_العام"), "الاسم_بالعربي": row.get("الاسم_بالعربي")})
+                    not_created.append({"الرقم_العسكري": row.get("الرقم_العسكري"), "الاسم_بالعربي": row.get("الاسم_بالعربي")})
                     continue
 
-                general_number = int(row.get("الرقم_العام"))
+                general_number = int(row.get("الرقم_العسكري"))
                 emp = self.db_conn.execute_query(
                     "SELECT id FROM employees WHERE general_number = ?",
                     (general_number,), fetch=True
                 )
 
                 if not emp.empty:
-                    not_created.append({"الرقم_العام": general_number, "الاسم_بالعربي": row.get("الاسم_بالعربي")})
+                    not_created.append({"الرقم_العسكري": general_number, "الاسم_بالعربي": row.get("الاسم_بالعربي")})
                     employee_id = emp.iloc[0]["id"]
                 else:
                     employee_id = self.db_conn.execute_query("""
@@ -1441,7 +1478,7 @@ class EmployeeDataHandler:
                             VALUES (?, ?, ?, ?, ?, ?)
                         """, (
                             int(employee_id), passport_number, int(passport_type_id),
-                            row.get("تاريخ_بداية_الجواز"), row.get("تاريخ_نهاية_الجواز"), "الشركة"
+                            row.get("تاريخ_بداية_الجواز"), row.get("تاريخ_نهاية_الجواز"), "الخطط_والمهام"
                         ), return_id=True)
                         # print(f"[INFO] Created passport {passport_number} with ID {passport_id}")
                     # else:
@@ -1515,13 +1552,13 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         timer.timeout.connect(self.update_datetime)
         timer.start(30000)
 
-        # الموظفين
+        # العسكر
         self.AddEmployeeButton.clicked.connect(self.open_add_employee_dialog)
 
         headers = [
             "الرقم", "الاسم عربي/النوع", "الاسم انجليزي/تاريخ الإصدار",
             "رقم الهوية/تاريخ الانتهاء", "الهاتف/جهة الإصدار",
-            "القسم", "المسمى_الوظيفي", "الدور", ""
+            "الوحدة", "الرتبة_العسكرية", "الدور", ""
         ]
         self.EmployeesList.setColumnCount(len(headers))
         self.EmployeesList.setHeaderLabels(headers)
@@ -1562,7 +1599,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
     def open_edit_employee_dialog(self, item):
         emp_id = item.data(0, QtCore.Qt.UserRole)
         if not emp_id:
-            QtWidgets.QMessageBox.warning(self, "خطأ", "لم يتم العثور على رقم الموظف!")
+            QtWidgets.QMessageBox.warning(self, "خطأ", "لم يتم العثور على رقم العسكري!")
             return
         
         dialog = EditEmployeeDialog(self, employee__id=emp_id)
@@ -1612,13 +1649,13 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
     def delete_employee(self, item):
         emp_id = item.data(0, QtCore.Qt.UserRole)
         if not emp_id:
-            QtWidgets.QMessageBox.warning(self, "خطأ", "لم يتم العثور على رقم الموظف!")
+            QtWidgets.QMessageBox.warning(self, "خطأ", "لم يتم العثور على رقم العسكري!")
             return
 
         reply = QtWidgets.QMessageBox.question(
             self,
             "تأكيد الحذف",
-            "هل أنت متأكد أنك تريد حذف هذا الموظف؟\nسيتم حذف كل بياناته المرتبطة أيضًا.",
+            "هل أنت متأكد أنك تريد حذف هذا العسكري؟\nسيتم حذف كل بياناته المرتبطة أيضًا.",
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
         )
         if reply == QtWidgets.QMessageBox.Yes:
@@ -1640,7 +1677,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             else:
                 print(f"المجلد غير موجود: {docs_folder}")
             
-            QtWidgets.QMessageBox.information(self, "نجاح", "تم حذف الموظف بنجاح")
+            QtWidgets.QMessageBox.information(self, "نجاح", "تم حذف العسكري بنجاح")
             self.refresh_emloyees()
 
     def make_combobox_multiselect(self, combo: QtWidgets.QComboBox):
@@ -1726,7 +1763,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             self.render_employees(filtered=self.is_filtered)
 
     def update_page_label(self):
-        """تحديث نص عدد الصفحات والموظفين"""
+        """تحديث نص عدد الصفحات والعسكر"""
         data = self.employees_data_filtered if not self.employees_data_filtered.empty else self.employees_data
         total_employees = len(data)
         total_pages = max(1, -(-total_employees // self.rows_per_page))
@@ -1735,12 +1772,12 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         showing_end = min(self.current_page * self.rows_per_page, total_employees)
 
         self.PageLabel.setText(
-            f"الموظفون: {showing_start}-{showing_end} من {total_employees} | صفحة {self.current_page} / {total_pages}"
+            f"العسكر: {showing_start}-{showing_end} من {total_employees} | صفحة {self.current_page} / {total_pages}"
         )
     
 
     def load_all_employees(self):
-        """تحميل كل بيانات الموظفين مرة واحدة فقط"""
+        """تحميل كل بيانات العسكر مرة واحدة فقط"""
         self.employees_data = self.db_conn.execute_query("""
             SELECT 
                 e.general_number,
@@ -1758,8 +1795,63 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         """, fetch=True)
 
         if not isinstance(self.employees_data, pd.DataFrame):
-            QtWidgets.QMessageBox.critical(self, "خطأ", f"فشل جلب بيانات الموظفين:\n{self.employees_data}")
+            QtWidgets.QMessageBox.critical(self, "خطأ", f"فشل جلب بيانات العسكر:\n{self.employees_data}")
             self.employees_data = pd.DataFrame()
+
+    @staticmethod
+    def filter_by_text(data, search_text):
+        if not search_text:
+            return data
+        return data[
+            data.apply(
+                lambda row: any(
+                    search_text in str(row[col]).lower()
+                    for col in ["general_number", "name_ar", "name_en", "national_id", "phone"]
+                ),
+                axis=1
+            )
+        ]
+
+    @staticmethod
+    def filter_by_department(data, department_id):
+        if not department_id:
+            return data
+        return data[data["department_id"] == department_id]
+
+    @staticmethod
+    def filter_by_job_title(data, job_title_id):
+        if not job_title_id:
+            return data
+        return data[data["job_title_id"] == job_title_id]
+    
+    @staticmethod
+    def filter_by_role(data, role_fard, role_masoul):
+        if role_fard and not role_masoul:
+            return data[data["role"] == "فرد"]
+        elif role_masoul and not role_fard:
+            return data[data["role"] == "ظابط"]
+        return data
+
+    def filter_by_visa(self, data, selected_visa_ids):
+        if not selected_visa_ids:
+            return data
+
+        valid_ids = set()
+        for emp_id in data["id"]:
+            visas = self.db_conn.execute_query(
+                """
+                SELECT v.visa_type_id
+                FROM visas v
+                JOIN passports p ON v.passport_id = p.id
+                WHERE p.employee_id = ?
+                """,
+                data=[emp_id],
+                fetch=True
+            )
+            if isinstance(visas, pd.DataFrame) and not visas.empty and any(v_id in selected_visa_ids for v_id in visas["visa_type_id"]):
+                valid_ids.add(emp_id)
+
+        return data[data["id"].isin(valid_ids)]
 
     def search_employees(self):
         self.SearchButton.setEnabled(False)
@@ -1768,73 +1860,33 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
 
         if self.employees_data is None or self.employees_data.empty:
             return
-    
+
         search_text = self.SearchEntry.text().strip().lower()
-        department = self.DepartmentEntry.currentText().strip()
-        job_title = self.JopEntry.currentText().strip()
+        department_id = self.DepartmentEntry.currentData()
+        job_title_id = self.JopEntry.currentData()
         role_fard = self.rolecheckBox1.isChecked()
         role_masoul = self.rolecheckBox2.isChecked()
-    
-        filtered_data = self.employees_data.copy()
-    
-        # ======== البحث النصي ========
-        if search_text:
-            filtered_data = filtered_data[
-                filtered_data.apply(
-                    lambda row: any(
-                        search_text in str(row[col]).lower()
-                        for col in ['general_number', 'name_ar', 'name_en', 'national_id', 'phone']
-                    ),
-                    axis=1
-                )
-            ]
-    
-        # ======== فلترة القسم والمسمى الوظيفي ========
-        if department:
-            filtered_data = filtered_data[filtered_data['department'] == department]
-    
-        if job_title:
-            filtered_data = filtered_data[filtered_data['job_title'] == job_title]
-    
-        # ======== فلترة الدور ========
-        if role_fard and not role_masoul:
-            filtered_data = filtered_data[filtered_data['role'] == "فرد"]
-        elif role_masoul and not role_fard:
-            filtered_data = filtered_data[filtered_data['role'] == "مسؤول"]
-    
-        # ======== فلترة الجوازات والتأشيرات ========
         selected_visa_ids = self.VisaTypeEntry.get_selected_ids()
-        if selected_visa_ids:
-            valid_ids = set()
-            for emp_id in filtered_data['id']:
-                visas = self.db_conn.execute_query("""
-                    SELECT v.visa_type_id
-                    FROM visas v
-                    LEFT JOIN passports p ON v.passport_id = p.id
-                    WHERE p.employee_id = ?
-                """, data=[emp_id], fetch=True)
-    
-                if visas.empty:
-                    continue
-    
-                if any(v_id in selected_visa_ids for v_id in visas['visa_type_id']):
-                    valid_ids.add(emp_id)
 
-            filtered_data = filtered_data[filtered_data['id'].isin(valid_ids)]
-            
-    
-        # ======== التحديث النهائي ========
+        filtered_data = self.employees_data.copy()
+
+        filtered_data = self.filter_by_text(filtered_data, search_text)
+        filtered_data = self.filter_by_department(filtered_data, department_id)
+        filtered_data = self.filter_by_job_title(filtered_data, job_title_id)
+        filtered_data = self.filter_by_role(filtered_data, role_fard, role_masoul)
+        filtered_data = self.filter_by_visa(filtered_data, selected_visa_ids)
+
         self.employees_data_filtered = filtered_data.reset_index(drop=True)
         self.current_page = 1
         self.is_filtered = True
         self.render_employees(filtered=True)
-    
+
         self.SearchButton.setEnabled(True)
         self.NextPageButton.setEnabled(True)
         self.PrevPageButton.setEnabled(True)
 
     def render_employees(self, filtered=False):
-        """عرض بيانات الموظفين (كاملة أو مفلترة)"""
+        """عرض بيانات العسكر (كاملة أو مفلترة)"""
         self.EmployeesList.clear()
         data = self.employees_data_filtered if filtered else self.employees_data
 
@@ -1930,7 +1982,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         self.update_page_label()
 
     def refresh_emloyees(self):
-        """تحديث بيانات الموظفين"""
+        """تحديث بيانات العسكر"""
         self.current_page = 1
         self.is_filtered = False
         self.selected_ids = []
@@ -1983,7 +2035,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
     
     def import_from_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, "استيراد بيانات الموظفين", "", "ملفات Excel (*.xlsx *.xls)"
+            self, "استيراد بيانات العسكر", "", "ملفات Excel (*.xlsx *.xls)"
         )
         if not file_path:
             return
@@ -2007,7 +2059,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
     def setup_custody_passports_table(self):
         self.table_passport_custody.setColumnCount(9)
         self.table_passport_custody.setHorizontalHeaderLabels([
-            "ID", "emp_ID", "اسم الموظف", "رقم الجواز", "نوع الجواز", "الحالة", "المسلّم", "المستلم", "تاريخ الاستلام"
+            "ID", "emp_ID", "اسم العسكري", "رقم الجواز", "نوع الجواز", "الحالة", "المسلّم", "المستلم", "تاريخ الاستلام"
         ])
         header = self.table_passport_custody.horizontalHeader()
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
@@ -2020,8 +2072,8 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         self.table_passport_custody.itemDoubleClicked.connect(self.open_employee_from_passport)
     
         # أزرار العهدة
-        self.btn_deliver_custody.clicked.connect(lambda: self.update_custody_status("الموظف"))
-        self.btn_receive_custody.clicked.connect(lambda: self.update_custody_status("الشركة"))
+        self.btn_deliver_custody.clicked.connect(lambda: self.update_custody_status("العسكري"))
+        self.btn_receive_custody.clicked.connect(lambda: self.update_custody_status("الخطط_والمهام"))
         self.refrech_passport_custody.clicked.connect(self.refresh_custody)
     
         # زر البحث
@@ -2051,10 +2103,10 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         self.table_passport_custody.clearSelection()
         self.table_passport_custody.setRowCount(len(df))
         for i, row in df.iterrows():
-            color = QtGui.QColor("#e3f2e3") if row['custodian'] == "الموظف" else QtGui.QColor("#f7f5e3")
+            color = QtGui.QColor("#e3f2e3") if row['custodian'] == "العسكري" else QtGui.QColor("#f7f5e3")
             for j, col in enumerate(df.columns):
                 if col == 'custodian':
-                    text = "مستلم" if row['custodian'] == "الموظف" else "غير مستلم"
+                    text = "مستلم" if row['custodian'] == "العسكري" else "غير مستلم"
                 elif col == 'received_at':
                     text = row['received_at'][:10] if pd.notna(row['received_at']) else ""
                 else:
@@ -2083,10 +2135,10 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             params.append(f"%{received_by}%")
         if is_received and not is_not_received:
             conditions.append("p.custodian = ?")
-            params.append("الموظف")
+            params.append("العسكري")
         elif is_not_received and not is_received:
             conditions.append("p.custodian = ?")
-            params.append("الشركة")
+            params.append("الخطط_والمهام")
     
         where_clause = " AND ".join(conditions) if conditions else ""
         self.load_custody_passports(where_clause, params)
@@ -2100,7 +2152,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
 
         # تحقق أن emp_id صالح
         if not emp_id_str or not emp_id_str.isdigit():
-            QtWidgets.QMessageBox.warning(self, "خطأ", f"لم يتم العثور على الموظف {emp_name}")
+            QtWidgets.QMessageBox.warning(self, "خطأ", f"لم يتم العثور على العسكري {emp_name}")
             return
 
         emp_id = int(emp_id_str)
@@ -2115,7 +2167,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "تحذير", "لم يتم اختيار أي جوازات.")
             return
     
-        action_text = "تسليم" if new_status == "الموظف" else "استلام"
+        action_text = "تسليم" if new_status == "العسكري" else "استلام"
         reply = QtWidgets.QMessageBox.question(
             self, self.app_title,
             f"هل أنت متأكد من {action_text} الجوازات المحددة؟",
@@ -2134,7 +2186,7 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
             employee_id = int(self.table_passport_custody.item(row.row(), 1).text())
             passport_number = self.table_passport_custody.item(row.row(), 3).text()
             status = self.table_passport_custody.item(row.row(), 5).text()
-            status = "الموظف" if status == "مستلم" else "الشركة"
+            status = "العسكري" if status == "مستلم" else "الخطط_والمهام"
                 
             if status == new_status:
                 already_status.append(passport_id)
@@ -2200,14 +2252,14 @@ class MainWindow(Ui_MainWindow, QtWidgets.QMainWindow):
         self.rb_visa_expired.setChecked(True)
 
         self.table_passports.setColumnCount(3)
-        self.table_passports.setHorizontalHeaderLabels(["اسم الموظف", "رقم الجواز", "تاريخ الانتهاء"])
+        self.table_passports.setHorizontalHeaderLabels(["اسم العسكري", "رقم الجواز", "تاريخ الانتهاء"])
         header = self.table_passports.horizontalHeader()
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.table_passports.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.table_passports.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
         self.table_visas.setColumnCount(4)
-        self.table_visas.setHorizontalHeaderLabels(["اسم الموظف", "رقم التأشيرة", "رقم الجواز", "تاريخ الانتهاء"])
+        self.table_visas.setHorizontalHeaderLabels(["اسم العسكري", "رقم التأشيرة", "رقم الجواز", "تاريخ الانتهاء"])
         header = self.table_visas.horizontalHeader()
         header.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.table_visas.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -2371,14 +2423,3 @@ if __name__ == '__main__':
 # pyuic5 ui/EditEmployeePage.ui -o EditEmployeePage.py
 # pyrcc5 ui/img/img.qrc -o img_rc.py
 # pyinstaller --windowed --icon=ui\img\logo.ico --add-data="ui\img\logo.png;." --name "HRM" main.py
-
-
-
-
-
-
-
-
-
-
-

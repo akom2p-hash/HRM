@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1135</width>
-    <height>782</height>
+    <height>657</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -94,6 +94,97 @@ QPushButton {
        <string>بيانات الموظف الأساسية</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="1">
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QLabel" name="label_photo">
+           <property name="minimumSize">
+            <size>
+             <width>250</width>
+             <height>200</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>صورة الموظف</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_upload_photo">
+           <property name="text">
+            <string>رفع صورة</string>
+           </property>
+           <property name="icon">
+            <iconset resource="img/img.qrc">
+             <normaloff>:/img/icon-edit-image.png</normaloff>:/img/icon-edit-image.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="1">
+        <layout class="QHBoxLayout" name="buttons_layout">
+         <property name="spacing">
+          <number>8</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="saveBtn">
+           <property name="text">
+            <string>حفظ</string>
+           </property>
+           <property name="icon">
+            <iconset resource="img/img.qrc">
+             <normaloff>:/img/icon-ok.png</normaloff>:/img/icon-ok.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="cancelBtn">
+           <property name="text">
+            <string>إلغاء</string>
+           </property>
+           <property name="icon">
+            <iconset resource="img/img.qrc">
+             <normaloff>:/img/icon-undelete.png</normaloff>:/img/icon-undelete.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item row="0" column="0" rowspan="2">
         <widget class="QFrame" name="EmployeeFrame">
          <property name="layoutDirection">
@@ -181,7 +272,7 @@ QPushButton {
           <item row="10" column="0">
            <widget class="QLabel" name="label_job_title">
             <property name="text">
-             <string>الرتبة :</string>
+             <string>الرتبة العسكرية:</string>
             </property>
            </widget>
           </item>
@@ -204,7 +295,7 @@ QPushButton {
             <item>
              <widget class="QLabel" name="label_role">
               <property name="text">
-               <string>الدور:</string>
+               <string>االرتبة:</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -221,7 +312,7 @@ QPushButton {
             <item>
              <widget class="QRadioButton" name="role_admin">
               <property name="text">
-               <string>ضابط</string>
+               <string>ظابط</string>
               </property>
              </widget>
             </item>
@@ -350,43 +441,6 @@ QPushButton {
          </layout>
         </widget>
        </item>
-       <item row="0" column="1">
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QLabel" name="label_photo">
-           <property name="minimumSize">
-            <size>
-             <width>250</width>
-             <height>200</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>صورة الموظف</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_upload_photo">
-           <property name="text">
-            <string>رفع صورة</string>
-           </property>
-           <property name="icon">
-            <iconset resource="img/img.qrc">
-             <normaloff>:/img/icon-edit-image.png</normaloff>:/img/icon-edit-image.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
        <item row="2" column="0">
         <spacer name="horizontalSpacer">
          <property name="orientation">
@@ -396,60 +450,6 @@ QPushButton {
           <size>
            <width>40</width>
            <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="4" column="1">
-        <layout class="QHBoxLayout" name="buttons_layout">
-         <property name="spacing">
-          <number>8</number>
-         </property>
-         <item>
-          <widget class="QPushButton" name="saveBtn">
-           <property name="text">
-            <string>حفظ</string>
-           </property>
-           <property name="icon">
-            <iconset resource="img/img.qrc">
-             <normaloff>:/img/icon-ok.png</normaloff>:/img/icon-ok.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="cancelBtn">
-           <property name="text">
-            <string>إلغاء</string>
-           </property>
-           <property name="icon">
-            <iconset resource="img/img.qrc">
-             <normaloff>:/img/icon-undelete.png</normaloff>:/img/icon-undelete.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="3" column="1">
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
           </size>
          </property>
         </spacer>
